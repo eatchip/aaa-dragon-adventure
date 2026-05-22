@@ -20,7 +20,7 @@
     flowers: document.getElementById("flowerText"),
     time: document.getElementById("timeText"),
     voiceMeter: document.getElementById("voiceMeter"),
-    healthMeter: document.getElementById("healthMeter"),
+    lifeHearts: document.getElementById("lifeHearts"),
     calibrationMeter: document.getElementById("calibrationMeter"),
     calibrationTitle: document.getElementById("calibrationTitle"),
     calibrationText: document.getElementById("calibrationText"),
@@ -30,7 +30,7 @@
     resultTitle: document.getElementById("resultTitle"),
     finalDistance: document.getElementById("finalDistance"),
     finalFlowers: document.getElementById("finalFlowers"),
-    finalHealth: document.getElementById("finalHealth"),
+    finalLives: document.getElementById("finalLives"),
     finalBadge: document.getElementById("finalBadge"),
     resultNote: document.getElementById("resultNote"),
   };
@@ -66,8 +66,8 @@
     elapsed: 0,
     distance: 0,
     flowers: 0,
-    maxHealth: 100,
-    health: 100,
+    maxLives: 3,
+    lives: 3,
     score: 0,
     speed: 300,
     shake: 0,
@@ -142,7 +142,9 @@
     ui.distance.textContent = formatMeters(game.distance);
     ui.flowers.textContent = String(game.flowers);
     ui.time.textContent = String(Math.max(0, Math.ceil(60 - game.elapsed)));
-    ui.healthMeter.style.width = `${clamp((game.health / game.maxHealth) * 100, 0, 100)}%`;
+    [...ui.lifeHearts.children].forEach((heart, index) => {
+      heart.classList.toggle("is-empty", index >= game.lives);
+    });
     ui.voiceMeter.style.width = `${clamp(audio.smoothed * 100, 0, 100)}%`;
     ui.calibrationMeter.style.width = `${clamp(audio.smoothed * 100, 0, 100)}%`;
   }
@@ -324,7 +326,7 @@
     game.elapsed = 0;
     game.distance = 0;
     game.flowers = 0;
-    game.health = game.maxHealth;
+    game.lives = game.maxLives;
     game.score = 0;
     game.speed = 280;
     game.shake = 0;
@@ -354,7 +356,7 @@
     ui.resultTitle.textContent = reason === "victory" ? "童心发动机满电" : getResultTitle(reason);
     ui.finalDistance.textContent = formatMeters(game.distance);
     ui.finalFlowers.textContent = String(game.flowers);
-    ui.finalHealth.textContent = `${Math.max(0, Math.round(game.health))}`;
+    ui.finalLives.textContent = `${Math.max(0, game.lives)}`;
     ui.finalBadge.textContent = badge;
     ui.resultNote.textContent = getResultNote(reason);
   }
@@ -375,7 +377,7 @@
       cloud: "被安静云吸住了",
       balloon: "麦克风气球飘走了",
       sky: "啊得太猛，飞到云上了",
-      outOfHealth: "童心值用完了",
+      outOfLives: "三条命用完了",
     };
     return titles[reason] || "童心发动机休息一下";
   }
@@ -395,62 +397,39 @@
       cloud: "安静云在天上，喊太高会撞到它。",
       balloon: "不要一直猛冲，断断续续更好控。",
       sky: "不用喊破嗓子，稳定啊就可以。",
-      outOfHealth: lastHitNotes[game.lastHitReason] || "吃到零食可以恢复童心值，再试一次会更稳。",
+      outOfLives: lastHitNotes[game.lastHitReason] || "偶尔会出现爱心，吃到就能补回一条命。",
       victory: "你把童年跑道点亮了，奖励自己一朵小红花。",
     };
     return notes[reason] || "你把作业怪吓了一跳。";
   }
 
-  function getObstacleDamage(type) {
-    const early = game.elapsed < 45;
-    const table = {
-      notebook: early ? 14 : 20,
-      alarm: early ? 15 : 21,
-      sign: early ? 16 : 22,
-      cloud: early ? 10 : 16,
-      balloon: early ? 11 : 17,
-    };
-    return table[type] || 16;
-  }
-
-  function getRewardHeal(type) {
-    const table = {
-      flower: 6,
-      lollipop: 12,
-      marble: 8,
-      console: 10,
-      snack: 14,
-    };
-    return table[type] || 8;
-  }
-
   function damageDino(obstacle) {
     if (game.invincible > 0 || obstacle.hit) return;
 
-    const damage = getObstacleDamage(obstacle.type);
     obstacle.hit = true;
     game.lastHitReason = obstacle.type;
-    game.health = clamp(game.health - damage, 0, game.maxHealth);
+    game.lives = clamp(game.lives - 1, 0, game.maxLives);
     game.invincible = 1.2;
     game.shake = 8;
     game.dino.vy = -260;
     game.dino.onGround = false;
 
     addParticles(game.dino.x + 56, game.dino.y + 42, "#ff6b6b", 16);
-    addFloatText(`-${damage} 童心`, game.dino.x + 54, game.dino.y - 8, "#f25064");
+    addFloatText("-1 生命", game.dino.x + 54, game.dino.y - 8, "#f25064");
     playTone("bump");
 
-    if (game.health <= 0) {
-      endGame("outOfHealth");
+    if (game.lives <= 0) {
+      endGame("outOfLives");
     }
   }
 
-  function healDino(reward) {
-    const heal = getRewardHeal(reward.type);
-    const before = game.health;
-    game.health = clamp(game.health + heal, 0, game.maxHealth);
-    if (game.health > before) {
-      addFloatText(`+${Math.round(game.health - before)} 童心`, reward.x - 18, reward.y - 40, "#24966f");
+  function addLife(reward) {
+    if (game.lives < game.maxLives) {
+      game.lives += 1;
+      return true;
+    } else {
+      game.score += 120;
+      return false;
     }
   }
 
@@ -487,13 +466,15 @@
   }
 
   function spawnReward() {
-    const type = pick(["flower", "lollipop", "marble", "console", "snack"]);
+    const missingLife = game.lives < game.maxLives;
+    const heartChance = missingLife && game.elapsed > 10 ? 0.1 : 0.025;
+    const type = Math.random() < heartChance ? "heart" : pick(["flower", "lollipop", "marble", "console", "snack"]);
     const high = game.elapsed > 18 && Math.random() > 0.62;
     game.rewards.push({
       type,
       x: W + rand(70, 220),
       y: high ? rand(230, 385) : rand(GROUND_Y - 190, GROUND_Y - 130),
-      size: type === "console" ? 48 : 42,
+      size: type === "console" || type === "heart" ? 48 : 42,
       spin: rand(0, Math.PI * 2),
       collected: false,
     });
@@ -655,11 +636,16 @@
       if (intersects(dinoHitbox, hitbox)) {
         reward.collected = true;
         game.flowers += reward.type === "flower" ? 1 : 0;
-        game.score += reward.type === "flower" ? 160 : 80;
-        if (reward.type !== "flower" && Math.random() > 0.55) game.flowers += 1;
-        healDino(reward);
-        addParticles(reward.x, reward.y, reward.type === "flower" ? "#f25064" : "#ffd568", 12);
-        addFloatText(reward.type === "flower" ? "+1 小红花" : "+零食", reward.x - 20, reward.y - 14);
+        game.score += reward.type === "flower" ? 160 : reward.type === "heart" ? 220 : 80;
+        if (reward.type !== "flower" && reward.type !== "heart" && Math.random() > 0.62) game.flowers += 1;
+        const gainedLife = reward.type === "heart" ? addLife(reward) : false;
+        addParticles(reward.x, reward.y, reward.type === "heart" ? "#ff5d72" : reward.type === "flower" ? "#f25064" : "#ffd568", 12);
+        addFloatText(
+          reward.type === "flower" ? "+1 小红花" : reward.type === "heart" ? (gainedLife ? "+1 生命" : "+童心") : "+零食",
+          reward.x - 20,
+          reward.y - 14,
+          reward.type === "heart" ? "#24966f" : "#f25064"
+        );
         playTone("collect");
       }
     }
@@ -1210,6 +1196,7 @@
     if (reward.type === "marble") drawMarble();
     if (reward.type === "console") drawConsole();
     if (reward.type === "snack") drawSnack();
+    if (reward.type === "heart") drawHeartReward();
     ctx.restore();
   }
 
@@ -1295,6 +1282,24 @@
     ctx.fillStyle = "#fff8de";
     ctx.fillRect(-9, -24, 18, 5);
     ctx.fillRect(-9, 20, 18, 5);
+  }
+
+  function drawHeartReward() {
+    ctx.save();
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = "#ff5d72";
+    roundedRect(-13, -12, 28, 28, 7);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(1, -13, 14, 0, Math.PI * 2);
+    ctx.arc(15, 1, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.beginPath();
+    ctx.ellipse(-5, -11, 5, 8, -0.7, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function drawParticles() {

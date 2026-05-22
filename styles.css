@@ -90,7 +90,7 @@ button {
 }
 
 .hud-chip,
-.health-panel,
+.lives-panel,
 .voice-panel {
   min-height: 46px;
   display: flex;
@@ -105,7 +105,7 @@ button {
 }
 
 .hud-chip span,
-.health-panel span,
+.lives-panel span,
 .voice-panel span {
   color: var(--muted);
   font-size: 13px;
@@ -124,8 +124,50 @@ button {
   justify-content: flex-end;
 }
 
-.health-panel {
+.lives-panel {
   justify-content: flex-end;
+}
+
+.life-hearts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.life-hearts i {
+  width: 22px;
+  height: 22px;
+  display: block;
+  position: relative;
+  transform: rotate(-45deg);
+  border-radius: 5px 5px 3px 5px;
+  background: linear-gradient(135deg, #ff5d72, #ff9f2e);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.life-hearts i::before,
+.life-hearts i::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.life-hearts i::before {
+  top: -10px;
+  left: 0;
+}
+
+.life-hearts i::after {
+  top: 0;
+  left: 10px;
+}
+
+.life-hearts i.is-empty {
+  background: rgba(80, 110, 120, 0.2);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.72);
 }
 
 .meter,
@@ -146,11 +188,6 @@ button {
   border-radius: inherit;
   background: linear-gradient(90deg, #60d394, #ffd166, #ff6b6b, #8b5cf6);
   transition: width 80ms linear;
-}
-
-.health-meter i {
-  width: 100%;
-  background: linear-gradient(90deg, #ff6b6b, #ffd166, #60d394);
 }
 
 .screen {
@@ -425,7 +462,7 @@ h2 {
   }
 
   .hud-chip,
-  .health-panel,
+  .lives-panel,
   .voice-panel {
     min-height: 34px;
     padding: 6px 8px;
@@ -433,7 +470,7 @@ h2 {
   }
 
   .hud-chip span,
-  .health-panel span,
+  .lives-panel span,
   .voice-panel span {
     font-size: 10px;
   }
@@ -448,9 +485,29 @@ h2 {
     justify-content: space-between;
   }
 
-  .health-panel {
+  .lives-panel {
     grid-column: 1 / -1;
     justify-content: space-between;
+  }
+
+  .life-hearts i {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px 4px 2px 4px;
+  }
+
+  .life-hearts i::before,
+  .life-hearts i::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .life-hearts i::before {
+    top: -7px;
+  }
+
+  .life-hearts i::after {
+    left: 7px;
   }
 
   .meter {

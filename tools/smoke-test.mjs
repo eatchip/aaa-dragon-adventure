@@ -40,7 +40,7 @@ const title = await page.textContent("h1").catch(() => null);
 const isPlaying = await page.locator("#hud.is-active").count();
 const resultVisible = await page.locator("#resultScreen.is-active").count();
 const distance = await page.textContent("#distanceText").catch(() => null);
-const healthWidth = await page.locator("#healthMeter").evaluate((el) => el.style.width).catch(() => null);
+const emptyLives = await page.locator("#lifeHearts .is-empty").count().catch(() => null);
 const resultTitle = await page.textContent("#resultTitle").catch(() => null);
 const canvasPixels = await page.evaluate(() => {
   const canvas = document.querySelector("#gameCanvas");
@@ -65,7 +65,7 @@ console.log(
       isPlaying: Boolean(isPlaying),
       resultVisible: Boolean(resultVisible),
       distance,
-      healthWidth,
+      livesRemaining: emptyLives === null ? null : 3 - emptyLives,
       resultTitle,
       canvasPixels,
       errors,
