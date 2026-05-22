@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>啊啊龙大冒险</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2368d6b5'/%3E%3Ccircle cx='37' cy='27' r='15' fill='%23fff8de'/%3E%3Ccircle cx='43' cy='23' r='4' fill='%2320303a'/%3E%3Cpath d='M14 42c12 3 27 1 38-9-7 16-27 20-38 9z' fill='%2324966f'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="stage" aria-label="啊啊龙大冒险游戏舞台">
+        <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+        <div class="hud" id="hud" aria-live="polite">
+          <div class="hud-chip">
+            <span>距离</span>
+            <strong id="distanceText">0m</strong>
+          </div>
+          <div class="hud-chip">
+            <span>小红花</span>
+            <strong id="flowerText">0</strong>
+          </div>
+          <div class="hud-chip">
+            <span>时间</span>
+            <strong id="timeText">60</strong>
+          </div>
+          <div class="health-panel" aria-label="童心值">
+            <span>童心值</span>
+            <div class="meter health-meter">
+              <i id="healthMeter"></i>
+            </div>
+          </div>
+          <div class="voice-panel" aria-label="啊啊能量">
+            <span>啊啊能量</span>
+            <div class="meter">
+              <i id="voiceMeter"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen screen-start is-active" id="startScreen">
+          <div class="hero-art" role="img" aria-label="啊啊龙和彩虹音浪主视觉"></div>
+          <div class="start-copy">
+            <p class="eyebrow">六一声控跑酷</p>
+            <h1>啊啊龙大冒险</h1>
+            <p class="tagline">不喊就落地，大声会起飞，喊得刚刚好才能赢。</p>
+            <div class="actions">
+              <button class="primary" id="startButton" type="button">开始啊！</button>
+              <button class="secondary" id="demoButton" type="button">键盘试玩</button>
+            </div>
+            <p class="privacy">声音只在本机用于控制，不保存、不上传。</p>
+          </div>
+        </div>
+
+        <div class="screen screen-calibration" id="calibrationScreen">
+          <div class="calibration-copy">
+            <p class="eyebrow">麦克风校准</p>
+            <h2 id="calibrationTitle">先安静一下</h2>
+            <p id="calibrationText">让啊啊龙听听现场底噪。</p>
+            <div class="calibration-meter">
+              <i id="calibrationMeter"></i>
+            </div>
+            <strong id="countdownText"></strong>
+          </div>
+        </div>
+
+        <div class="screen screen-error" id="errorScreen">
+          <div class="message-box">
+            <p class="eyebrow">麦克风没有准备好</p>
+            <h2>可以先用空格键试玩</h2>
+            <p id="errorText">浏览器没有拿到麦克风权限。</p>
+            <div class="actions">
+              <button class="primary" id="retryButton" type="button">重新授权</button>
+              <button class="secondary" id="fallbackButton" type="button">空格试玩</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen screen-result" id="resultScreen">
+          <div class="result-card">
+            <p class="eyebrow" id="resultEyebrow">挑战结束</p>
+            <h2 id="resultTitle">童心发动机启动成功</h2>
+            <div class="result-grid">
+              <div>
+                <span>距离</span>
+                <strong id="finalDistance">0m</strong>
+              </div>
+              <div>
+                <span>小红花</span>
+                <strong id="finalFlowers">0</strong>
+              </div>
+              <div>
+                <span>剩余童心</span>
+                <strong id="finalHealth">0</strong>
+              </div>
+              <div>
+                <span>称号</span>
+                <strong id="finalBadge">啊啊新手</strong>
+              </div>
+            </div>
+            <p id="resultNote">你把作业怪吓了一跳。</p>
+            <div class="actions">
+              <button class="primary" id="restartButton" type="button">再来一局</button>
+              <button class="secondary" id="fullscreenButton" type="button">全屏展示</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./game.js"></script>
+  </body>
+</html>
