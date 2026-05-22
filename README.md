@@ -2,6 +2,8 @@
 
 六一派对用的声控跑酷小游戏。玩家不用键盘，只要对着麦克风持续“啊——”，就能给啊啊龙提供能量，让它在空中飘起来。
 
+[在线试玩](https://eatchip.github.io/aaa-dragon-adventure/)
+
 ![啊啊龙大冒险预览](./smoke-preview.png)
 
 ## 玩法
